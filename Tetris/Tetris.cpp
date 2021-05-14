@@ -1,50 +1,53 @@
 ﻿#include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include<iostream>
+
 #include "Tetramino.h"
 
 
 using namespace sf;
 
-Vector2i boardSize(10, 10);
-Vector2f cellSize(60, 60);
+Vector2i boardSize(20, 20);
+Vector2f cellSize(30, 30);
 Tetramino tetraminos[7];
 
+int* board = nullptr;
 
 
 void CreateTetraminos()
 {
-    int i[4][4] = { 0,0,0,0,
-                   0,0,0,0,
-                   0,0,0,0,
-                   0,0,0,0, };
+    int i[4][4] = { 0,1,0,0,
+                   0,1,0,0,
+                   0,1,0,0,
+                   0,1,0,0, };
 
-    int j[4][4] = { 0,0,0,0,
-                    0,0,0,0,
-                    0,0,0,0,
+    int j[4][4] = { 0,1,0,0,
+                    0,1,0,0,
+                    1,1,0,0,
                     0,0,0,0, };
 
-    int l[4][4] = { 0,0,0,0,
-                   0,0,0,0,
-                   0,0,0,0,
+    int l[4][4] = { 0,0,1,0,
+                   0,0,1,0,
+                   0,0,1,1,
                    0,0,0,0, };
 
     int o[4][4] = { 0,0,0,0,
-                    0,0,0,0,
-                    0,0,0,0,
+                    0,1,1,0,
+                    0,1,1,0,
                     0,0,0,0, };
 
-    int s[4][4] = { 0,0,0,0,
-                   0,0,0,0,
+    int s[4][4] = { 0,0,1,1,
+                   0,1,1,0,
                    0,0,0,0,
                    0,0,0,0, };
 
-    int t[4][4] = { 0,0,0,0,
-                    0,0,0,0,
+    int t[4][4] = { 0,1,0,0,
+                    1,1,1,0,
                     0,0,0,0,
                     0,0,0,0, };
 
-    int z[4][4] = { 0,0,0,0,
-                   0,0,0,0,
+    int z[4][4] = {1,1,0,0,
+                   0,1,1,0,
                    0,0,0,0,
                    0,0,0,0, };
 
@@ -58,19 +61,43 @@ void CreateTetraminos()
 
 }
 
+void DisplayTetramino(Vector2i pos, int* tetramino) 
+{
+    for (int y = 0; y < 4; y++)
+    {
+        for (int x = 0; x < 4; x++)
+        {
+            if (tetramino[y * 4 + x] == 1)
+            {
+                board[(y + pos.y) * boardSize.x + x + pos.x] = 1;
+
+            }
+        }
+    }
+}
+
 int main()
 {
 
     //Awake
     RenderWindow window(VideoMode(600, 600), "Tetris"); //Create window
-    int* board = new int[boardSize.x * boardSize.y];     //playBoard    0 empty, 1 filled
+    board = new int[boardSize.x * boardSize.y];     //playBoard    0 empty, 1 filled
+
+    
 
     for (int i = 0; i < boardSize.x * boardSize.y; i++) { board[i] = 0;}
 
     CreateTetraminos();
 
     //Game varible
-    Vector2i curentPos(0, 0);
+    Tetramino curent = tetraminos[0];
+    
+    //Debug
+    curent.SetPosition(Vector2i(1,1));
+    curent.SetRotation(1);
+    DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
+    //    
+
 
     //Game loop
     while (window.isOpen())

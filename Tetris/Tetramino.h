@@ -7,7 +7,7 @@ using namespace sf;
 class Tetramino
 {
 	private:
-		int content[4][4];
+		int content[16];
 		double rotation;
 		
 		Vector2i position;
