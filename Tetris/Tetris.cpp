@@ -1,6 +1,8 @@
 ﻿#include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include<iostream>
+#include<thread>
+#include<windows.h>
 
 #include "Tetramino.h"
 
@@ -76,35 +78,58 @@ void DisplayTetramino(Vector2i pos, int* tetramino)
     }
 }
 
+void ClearTetramino(Vector2i pos, int* tetramino)
+{
+    for (int y = 0; y < 4; y++)
+    {
+        for (int x = 0; x < 4; x++)
+        {
+            if (tetramino[y * 4 + x] == 1)
+            {
+                board[(y + pos.y) * boardSize.x + x + pos.x] = 0;
+
+            }
+        }
+    }
+}
+
+
 int main()
 {
 
     //Awake
     RenderWindow window(VideoMode(600, 600), "Tetris"); //Create window
-    board = new int[boardSize.x * boardSize.y];     //playBoard    0 empty, 1 filled
-
+    window.setFramerateLimit(60);
     
+    board = new int[boardSize.x * boardSize.y];         //create paly board 0 empty, 1 filled
 
+    //fil board
     for (int i = 0; i < boardSize.x * boardSize.y; i++) { board[i] = 0;}
 
+   
     CreateTetraminos();
 
     //Game varible
     Tetramino curent = tetraminos[0];
     
+    //Timing
+    int sleepTime = 35;
+    int tetaminoStop = 20;
+    int counter = 0;
+
     //Debug
     curent.SetPosition(Vector2i(1,1));
-    curent.SetRotation(1);
-    DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
     //    
 
 
     //Game loop
     while (window.isOpen())
     {
-        
-        
-        
+       
+        //--------Timing--------//
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
+        counter += 1;
+
         //--------Input--------//
 
         //Pool event
@@ -117,9 +142,19 @@ int main()
         }
 
         //--------Update--------//
-       
+        ClearTetramino(curent.GetPositon(), curent.GetTetramino());
+
+        if (counter >= tetaminoStop)
+        {
+            curent.SetPosition(Vector2i(0, 1));
+            counter = 0;
+        }
+        
+        
+        DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
 
         //--------Render--------//
+
 
         //clear window
         window.clear();
