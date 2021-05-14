@@ -20,3 +20,4 @@ Tetris/Debug/Tetris.tlog/CL.command.1.tlog
 Tetris/Debug/Tetris.vcxproj.FileListAbsolute.txt
 *.pdb
 *.dll
+*.obj

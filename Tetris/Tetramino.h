@@ -8,7 +8,7 @@ class Tetramino
 {
 	private:
 		int content[4][4];
-		int rotation;
+		double rotation;
 		
 		Vector2i position;
 		Vector2f pivotPoint;
@@ -16,6 +16,7 @@ class Tetramino
 
 	public: 
 		Tetramino(int[4][4],Vector2i,Vector2f);
+		Tetramino();
 		~Tetramino();
 		
 		void SetPosition(Vector2i);

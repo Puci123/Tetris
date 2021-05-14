@@ -1,6 +1,22 @@
 #include "Tetramino.h"
 #include <math.h>
 
+
+Tetramino::Tetramino() 
+{
+	for (int x = 0; x < 4; x++)
+	{
+		for (int y = 0; y < 4; y++)
+		{
+			content[x][y] = 0;
+		}
+	}
+
+	position = Vector2i(0,0);
+	pivotPoint = Vector2f(0, 0);
+	rotation = 0;
+}
+
 Tetramino::Tetramino(int tetramino[4][4], Vector2i pos, Vector2f pivot)
 {
 	
@@ -36,7 +52,7 @@ Vector2i Tetramino::GetPositon()
 
 int* Tetramino::GetTetramino()
 {
-	int temp[4][4];
+	static int temp[4][4];
 
 	for (int yO = 0; yO < 4; yO++)
 	{
