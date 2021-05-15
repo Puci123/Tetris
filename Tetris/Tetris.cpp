@@ -138,9 +138,14 @@ int main()
    
     CreateTetraminos();
 
-    //Game varible
+    //--------Game varible--------//
     Tetramino curent = tetraminos[0];
     curent.SetPosition(Vector2i( 2, 0));
+
+    //Input
+    bool preasdRoateButton = false;
+   
+
 
     //Timing
     int sleepTime = 35;
@@ -152,7 +157,7 @@ int main()
     //    
 
 
-    //Game loop
+    //--------Game loop--------//
     while (window.isOpen())
     {
      
@@ -178,6 +183,8 @@ int main()
 
 
         //--------Move handle--------//
+        
+        //Horizontal
         if (Keyboard::isKeyPressed(Keyboard::Right))
         {
             std::cout << "R" << std::endl;
@@ -196,7 +203,30 @@ int main()
             }
         }
         
+        //Vertical
+        if (Keyboard::isKeyPressed(Keyboard::Down))
+        {
+            std::cout << "D" << std::endl;
+            counter = sleepTime;
+        }
         
+       
+        //Roatation
+        if (Keyboard::isKeyPressed(Keyboard::Up) && !preasdRoateButton)
+        {
+            std::cout << "Rotate" << std::endl;
+            if (!ColisionDetecd(curent.GetPositon() + Vector2i(1, 0), curent.GetTetramino(curent.GetRoatation() + 1)))
+            {
+                curent.SetRotation(1);
+            }
+
+            preasdRoateButton = true;
+
+        }
+        else
+        {
+            preasdRoateButton = false;
+        }
 
         //--------Update--------//
 

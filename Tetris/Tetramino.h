@@ -23,7 +23,9 @@ class Tetramino
 		void SetRotation(int);
 
 		int* GetTetramino();
-		Vector2i GetPositon();
+		int* GetTetramino(int);
 
+		Vector2i GetPositon();
+		int GetRoatation();
 };
 
