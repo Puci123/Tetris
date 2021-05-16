@@ -177,13 +177,18 @@ int main()
             //Input handle
             if (event.type == Event::Closed)
                 window.close();
+            else if (event.type == Event::KeyReleased && event.key.code == Keyboard::Up)
+                preasdRoateButton = false;
+            
+
+
         }
 
         ClearTetramino(curent.GetPositon(), curent.GetTetramino());
 
 
         //--------Move handle--------//
-        
+      
         //Horizontal
         if (Keyboard::isKeyPressed(Keyboard::Right))
         {
@@ -210,12 +215,11 @@ int main()
             counter = sleepTime;
         }
         
-       
         //Roatation
         if (Keyboard::isKeyPressed(Keyboard::Up) && !preasdRoateButton)
         {
             std::cout << "Rotate" << std::endl;
-            if (!ColisionDetecd(curent.GetPositon() + Vector2i(1, 0), curent.GetTetramino(curent.GetRoatation() + 1)))
+            if (!ColisionDetecd(curent.GetPositon(), curent.GetTetramino(curent.GetRoatation() + 1)))
             {
                 curent.SetRotation(1);
             }
@@ -223,10 +227,7 @@ int main()
             preasdRoateButton = true;
 
         }
-        else
-        {
-            preasdRoateButton = false;
-        }
+       
 
         //--------Update--------//
 
