@@ -16,6 +16,13 @@ Tetramino tetraminos[7];
 
 int* board = nullptr;
 
+Tetramino NewTetramino() 
+{
+    Tetramino temp = tetraminos[2];
+    temp.SetPosition(Vector2i(1,1));
+
+    return temp;
+}
 
 void CreateTetraminos()
 {
@@ -79,13 +86,49 @@ void DisplayTetramino(Vector2i pos, int* tetramino)
     }
 }
 
+void DropStack(int line) 
+{
+    for (int y = line; y > 1; y--)
+    {
+        for (int x = 1; x < boardSize.x - 1; x++)
+        {
+            board[y * boardSize.x + x] = board[(y - 1) * boardSize.x + x];
+        }
+    }
+
+    std::cout << "Drop Down stack" << std::endl;
+}
+
+void CheckLines()
+{
+    for (int y = 0; y < boardSize.y - 1; y++)
+    {
+        bool found = true;
+        
+        for (int x = 1; x < boardSize.x - 1; x++)
+        {
+            if (board[y * boardSize.x + x] == 0) 
+            {
+                found = false;
+                break;
+            }
+        }
+
+        if (found)
+        {
+            std::cout << "Complete line" << std::endl;
+            DropStack(y);   
+        }
+    }
+}
+
 void ClearTetramino(Vector2i pos, int* tetramino)
 {
     for (int y = 0; y < 4; y++)
     {
         for (int x = 0; x < 4; x++)
         {
-            if (tetramino[y * 4 + x] == 1)
+            if (tetramino[y * 4 + x] == 1 && board[(y + pos.y) * boardSize.x + x + pos.x] == 1)
             {
                 board[(y + pos.y) * boardSize.x + x + pos.x] = 0;
 
@@ -140,11 +183,11 @@ int main()
 
     //--------Game varible--------//
     Tetramino curent = tetraminos[0];
-    curent.SetPosition(Vector2i( 2, 0));
+    bool clear = true;
 
     //Input
     bool preasdRoateButton = false;
-   
+    
 
 
     //Timing
@@ -180,15 +223,16 @@ int main()
             else if (event.type == Event::KeyReleased && event.key.code == Keyboard::Up)
                 preasdRoateButton = false;
             
-
-
         }
 
-        ClearTetramino(curent.GetPositon(), curent.GetTetramino());
 
 
         //--------Move handle--------//
-      
+        
+        ClearTetramino(curent.GetPositon(), curent.GetTetramino());
+        
+
+
         //Horizontal
         if (Keyboard::isKeyPressed(Keyboard::Right))
         {
@@ -238,10 +282,22 @@ int main()
             {
                 curent.SetPosition(Vector2i(0, 1));
             }
+            else
+            {
+                DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
+
+                //Is line complete
+                CheckLines();
+
+                //Create new teramino
+                curent = NewTetramino();
+                clear = false;
+                DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
+
+            }
             
             counter = 0;
         }
-        
         
         DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
 
