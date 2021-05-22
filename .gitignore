@@ -21,3 +21,8 @@ Tetris/Debug/Tetris.vcxproj.FileListAbsolute.txt
 *.pdb
 *.dll
 *.obj
+*.log
+*.iobj
+*.recipe
+*.ipdb
+*.txt

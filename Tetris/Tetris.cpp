@@ -1,5 +1,6 @@
 ﻿#include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include<SFML/System.hpp>
 #include<iostream>
 #include<thread>
 #include<windows.h>
@@ -99,8 +100,10 @@ void DropStack(int line)
     std::cout << "Drop Down stack" << std::endl;
 }
 
-void CheckLines()
+int CheckLines()
 {
+    int completed = 0;
+
     for (int y = 0; y < boardSize.y - 1; y++)
     {
         bool found = true;
@@ -117,9 +120,12 @@ void CheckLines()
         if (found)
         {
             std::cout << "Complete line" << std::endl;
+            completed++;
             DropStack(y);   
         }
     }
+
+    return completed;
 }
 
 void ClearTetramino(Vector2i pos, int* tetramino)
@@ -160,6 +166,31 @@ int main()
     window.setFramerateLimit(60);
     
     board = new int[boardSize.x * boardSize.y];         //create paly board 0 empty, 1 tetramino , 2 wall
+   
+    //Load font
+    Font font;
+
+    if (!font.loadFromFile("arcadeFont.ttf"))
+    {
+        throw("ERRO, FONT LOAD");
+        return -1;
+    }
+
+    //Score Text
+    Text scoreText;
+    scoreText.setFont(font);
+    scoreText.setCharacterSize(20);
+    scoreText.setFillColor(Color::White);
+    scoreText.setPosition(Vector2f(boardSize.x + boardOffset.x + 200, 20));
+    
+
+    //Level Text
+    Text lvlText;
+    lvlText.setFont(font);
+    lvlText.setCharacterSize(20);
+    lvlText.setFillColor(Color::White);
+    lvlText.setPosition(Vector2f(boardSize.x + boardOffset.x + 201, 40));
+    lvlText.setString("level 1");
 
     //fil board
     for (int y = 0; y < boardSize.y; y++)
@@ -188,8 +219,6 @@ int main()
     //Input
     bool preasdRoateButton = false;
     
-
-
     //Timing
     int sleepTime = 35;
     int tetaminoStop = 20;
@@ -197,7 +226,10 @@ int main()
 
     //Debug
     curent.SetPosition(Vector2i(1,1));
-    //    
+       
+    //Score
+    int score = 0;
+
 
 
     //--------Game loop--------//
@@ -287,7 +319,10 @@ int main()
                 DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
 
                 //Is line complete
-                CheckLines();
+                int temp = CheckLines();
+                score += temp * temp; // add points
+
+                std::cout << "Score: " << score << std::endl;
 
                 //Create new teramino
                 curent = NewTetramino();
@@ -334,7 +369,11 @@ int main()
             }
         }
 
-    
+        //Show score
+        scoreText.setString("Score " + std::to_string(score));
+        window.draw(scoreText);
+        window.draw(lvlText);
+
         window.display();
     }
 
