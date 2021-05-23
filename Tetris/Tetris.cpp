@@ -4,6 +4,9 @@
 #include<iostream>
 #include<thread>
 #include<windows.h>
+#include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
 
 #include "Tetramino.h"
 
@@ -19,7 +22,7 @@ int* board = nullptr;
 
 Tetramino NewTetramino() 
 {
-    Tetramino temp = tetraminos[2];
+    Tetramino temp = tetraminos[rand() % 7];
     temp.SetPosition(Vector2i(1,1));
 
     return temp;
@@ -241,36 +244,223 @@ void InputHnadle(RenderWindow &window, bool & preasdRoateButton)
     }
 }
 
-void GameOver(Text &scoreText, Text  &lvlText, Tetramino &curent, RenderWindow &window, Font &font)
+bool InputHnadle(RenderWindow& window) 
 {
-    std::cout << "Game over" << std::endl;
-
-    //Clear board
-    for (int i = 0; i < boardSize.x * boardSize.y; i++)
+    //Pool event
+    Event event;
+    while (window.pollEvent(event))
     {
-        board[i] = 0;
+        //Input handle
+        if (event.type == Event::Closed) 
+        {
+            window.close();
+            return false;
+        }
+        else if (event.type == Event::KeyPressed && event.key.code == Keyboard::Enter)
+        {
+            return true;
+
+        }    
     }
 
-    //Clear tetramino
-    curent = tetraminos[7];
+    return false;
+}
 
-    //Clear Text
-    scoreText.setPosition(Vector2f(boardSize.x + boardOffset.x + 110, 120));
-    lvlText.setPosition((Vector2f(boardSize.x + boardOffset.x + 110, 100)));
+void GameOver(Text &scoreText, Text  &lvlText,  RenderWindow &window, Font &font)
+{
+    //std::cout << "Game over" << std::endl;
 
-    //Display Game over text
+    window.clear();
+
+
+    //Move text
+    scoreText.setPosition(Vector2f(boardSize.x + boardOffset.x + 210, 150));
+    scoreText.setCharacterSize(25);
+    lvlText.setPosition((Vector2f(boardSize.x + boardOffset.x + 210, 180)));
+    lvlText.setCharacterSize(25);
+
+    //Game over text
     Text goText;
-    scoreText.setFont(font);
-    scoreText.setCharacterSize(50);
-    scoreText.setFillColor(Color::White);
-    scoreText.setPosition(Vector2f(boardSize.x + boardOffset.x + 110, 20));
-    scoreText.setString("GAME OVER !!!");
+    goText.setFont(font);
+    goText.setCharacterSize(50);
+    goText.setFillColor(Color::White);
+    goText.setPosition(Vector2f(boardSize.x + boardOffset.x + 110, 50));
+    goText.setString("Game over !!!");
     
-    window.draw(goText);
-    window.draw(scoreText);
-    window.draw(lvlText);
+    //Inofo text
+    Text infoText;
+    infoText.setFont(font);
+    infoText.setCharacterSize(20);
+    infoText.setFillColor(Color::White);
+    infoText.setPosition(Vector2f(boardSize.x + boardOffset.x + 150, 250));
+    infoText.setString("Pres enter to continue");
 
+    window.draw(infoText);
+    window.draw(goText);
+    window.draw(lvlText);   
+    window.draw(scoreText);
     window.display();
+
+    while (true)
+    {
+        if (InputHnadle(window)) 
+        {
+            break;
+        }
+    }
+}
+
+void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
+{
+    //------Game Start------//
+    CreateBoard();
+
+    scoreText.setCharacterSize(20);
+    scoreText.setFillColor(Color::White);
+    scoreText.setPosition(Vector2f(boardSize.x + boardOffset.x + 200, 20));
+    scoreText.setString("Score 0");
+
+    lvlText.setCharacterSize(20);
+    lvlText.setFillColor(Color::White);
+    lvlText.setPosition(Vector2f(boardSize.x + boardOffset.x + 201, 40));
+    lvlText.setString("level 1");
+
+    //--------Game varible--------//
+    Tetramino curent = tetraminos[0];
+    bool isPlaying = true;
+
+    //Input
+    bool preasdRoateButton = false;
+
+    //Timing
+    int sleepTime = 35;
+    int tetaminoStop = 20;
+    int counter = 0;
+
+    //Debug
+    curent.SetPosition(Vector2i(1, 1));
+
+    //Score
+    int score = 0;
+    int lines = 0;
+    int lvl = 1;
+
+    while (isPlaying)
+    {
+        Vector2i traslation(0, 0);
+        bool roatate = false;
+
+        //--------Timing--------//
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
+        counter += 1;
+
+        //--------Input--------//
+
+        InputHnadle(window, preasdRoateButton);
+
+
+
+        //--------Move handle--------//
+
+        ClearTetramino(curent.GetPositon(), curent.GetTetramino());
+
+
+
+        //Horizontal
+        if (Keyboard::isKeyPressed(Keyboard::Right))
+        {
+            if (!ColisionDetecd(curent.GetPositon() + Vector2i(1, 0), curent.GetTetramino()))
+            {
+                curent.SetPosition(Vector2i(1, 0));
+            }
+
+        }
+        else if (Keyboard::isKeyPressed(Keyboard::Left))
+        {
+            if (!ColisionDetecd(curent.GetPositon() + Vector2i(-1, 0), curent.GetTetramino()))
+            {
+                curent.SetPosition(Vector2i(-1, 0));
+            }
+        }
+
+        //Vertical
+        if (Keyboard::isKeyPressed(Keyboard::Down))
+        {
+            counter = sleepTime;
+        }
+
+        //Roatation
+        if (Keyboard::isKeyPressed(Keyboard::Up) && !preasdRoateButton)
+        {
+            if (!ColisionDetecd(curent.GetPositon(), curent.GetTetramino(curent.GetRoatation() + 1)))
+            {
+                curent.SetRotation(1);
+            }
+
+            preasdRoateButton = true;
+
+        }
+
+
+        //--------Update--------//
+
+        if (counter >= tetaminoStop)
+        {
+            //Move down
+            if (!ColisionDetecd(curent.GetPositon() + Vector2i(0, 1), curent.GetTetramino()))
+            {
+                curent.SetPosition(Vector2i(0, 1));
+            }
+            else
+            {
+                DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
+
+                //Is line complete
+                int temp = CheckLines();
+                if (temp > 0)
+                {
+                    score += temp * temp; // add score
+                    lines += temp;        // count lines
+
+                    std::cout << "Score: " << score << std::endl;
+                    std::cout << "Lines: " << lines << std::endl;
+
+                    //Level up
+                    if (lines % 5 == 0 && lines > 0)
+                    {
+                        lvl++;
+                        std::cout << "Curent level: " << lvl << std::endl;
+                        lvlText.setString("Level " + std::to_string(lvl));
+
+                        tetaminoStop = (int)(tetaminoStop * 0.75f);
+                        std::cout << "Game speed: " << tetaminoStop << std::endl;
+
+                    }
+
+                    //Display score
+                    scoreText.setString("Score " + std::to_string(score));
+
+                }
+                //Create new teramino
+                curent = NewTetramino();
+
+                //Game over
+                if (ColisionDetecd(curent.GetPositon(), curent.GetTetramino()))
+                {
+                    isPlaying = false;
+                }
+
+            }
+            counter = 0;
+        }
+
+        DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
+
+        //--------Render--------//
+        DrawBoard(window, scoreText, lvlText);
+
+
+    }
 }
 
 int main()
@@ -293,169 +483,22 @@ int main()
     //Score Text
     Text scoreText;
     scoreText.setFont(font);
-    scoreText.setCharacterSize(20);
-    scoreText.setFillColor(Color::White);
-    scoreText.setPosition(Vector2f(boardSize.x + boardOffset.x + 200, 20));
-    scoreText.setString("Score 0");
-
+  
 
     //Level Text
     Text lvlText;
     lvlText.setFont(font);
-    lvlText.setCharacterSize(20);
-    lvlText.setFillColor(Color::White);
-    lvlText.setPosition(Vector2f(boardSize.x + boardOffset.x + 201, 40));
-    lvlText.setString("level 1");
+   
+    //CreateSeed
+    srand(unsigned(time(NULL)));
 
-    
-
-    CreateBoard();
     CreateTetraminos();
-
-    //--------Game varible--------//
-    Tetramino curent = tetraminos[0];
-    bool isPlaying = true;
-
-    //Input
-    bool preasdRoateButton = false;
-    
-    //Timing
-    int sleepTime = 35;
-    int tetaminoStop = 20;
-    int counter = 0;
-
-    //Debug
-    curent.SetPosition(Vector2i(1,1));
-       
-    //Score
-    int score = 0;
-    int lines = 0;
-    int lvl = 1;
-
 
     //--------Window loop--------//
     while (window.isOpen())
     {
-        while (isPlaying)
-        {
-            Vector2i traslation(0, 0);
-            bool roatate = false;
-
-            //--------Timing--------//
-            std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
-            counter += 1;
-
-            //--------Input--------//
-
-            InputHnadle(window, preasdRoateButton);
-
-
-
-            //--------Move handle--------//
-
-            ClearTetramino(curent.GetPositon(), curent.GetTetramino());
-
-
-
-            //Horizontal
-            if (Keyboard::isKeyPressed(Keyboard::Right))
-            {
-                if (!ColisionDetecd(curent.GetPositon() + Vector2i(1, 0), curent.GetTetramino()))
-                {
-                    curent.SetPosition(Vector2i(1, 0));
-                }
-
-            }
-            else if (Keyboard::isKeyPressed(Keyboard::Left))
-            {
-                if (!ColisionDetecd(curent.GetPositon() + Vector2i(-1, 0), curent.GetTetramino()))
-                {
-                    curent.SetPosition(Vector2i(-1, 0));
-                }
-            }
-
-            //Vertical
-            if (Keyboard::isKeyPressed(Keyboard::Down))
-            {
-                counter = sleepTime;
-            }
-
-            //Roatation
-            if (Keyboard::isKeyPressed(Keyboard::Up) && !preasdRoateButton)
-            {
-                if (!ColisionDetecd(curent.GetPositon(), curent.GetTetramino(curent.GetRoatation() + 1)))
-                {
-                    curent.SetRotation(1);
-                }
-
-                preasdRoateButton = true;
-
-            }
-
-
-            //--------Update--------//
-
-            if (counter >= tetaminoStop)
-            {
-                //Move down
-                if (!ColisionDetecd(curent.GetPositon() + Vector2i(0, 1), curent.GetTetramino()))
-                {
-                    curent.SetPosition(Vector2i(0, 1));
-                }
-                else
-                {
-                    DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
-
-                    //Is line complete
-                    int temp = CheckLines();
-                    if (temp > 0)
-                    {
-                        score += temp * temp; // add score
-                        lines += temp;        // count lines
-
-                        std::cout << "Score: " << score << std::endl;
-                        std::cout << "Lines: " << lines << std::endl;
-
-                        //Level up
-                        if (lines % 5 == 0 && lines > 0)
-                        {
-                            lvl++;
-                            std::cout << "Curent level: " << lvl << std::endl;
-                            lvlText.setString("Level " + std::to_string(lvl));
-
-                            tetaminoStop = (int)(tetaminoStop * 0.75f);
-                            std::cout << "Game speed: " << tetaminoStop << std::endl;
-
-                        }
-                        
-                        //Display score
-                        scoreText.setString("Score " + std::to_string(score));
-
-                    }
-                    //Create new teramino
-                    curent = NewTetramino();
-
-                    //Game over
-                    if (ColisionDetecd(curent.GetPositon(), curent.GetTetramino()))
-                    {
-                        GameOver(scoreText, lvlText, curent, window, font);
-                        isPlaying = false;
-
-                    }
-                
-                }
-                counter = 0;
-            }
-
-            DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
-
-            //--------Render--------//
-            DrawBoard(window,scoreText,lvlText);
-
-            
-        }
-
-        InputHnadle(window,preasdRoateButton);
+        Game(window,font, scoreText, lvlText);
+        GameOver(scoreText, lvlText, window, font);
     }
     return 0;
 }
