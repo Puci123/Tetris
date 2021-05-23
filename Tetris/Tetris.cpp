@@ -229,7 +229,8 @@ int main()
        
     //Score
     int score = 0;
-
+    int lines = 0;
+    int lvl = 1;
 
 
     //--------Game loop--------//
@@ -268,7 +269,6 @@ int main()
         //Horizontal
         if (Keyboard::isKeyPressed(Keyboard::Right))
         {
-            std::cout << "R" << std::endl;
             if (!ColisionDetecd(curent.GetPositon() + Vector2i(1,0), curent.GetTetramino()))
             {
                 curent.SetPosition(Vector2i(1, 0));
@@ -277,7 +277,6 @@ int main()
         }
         else if (Keyboard::isKeyPressed(Keyboard::Left))
         {
-            std::cout << "L" << std::endl;
             if (!ColisionDetecd(curent.GetPositon() + Vector2i(-1, 0), curent.GetTetramino()))
             {
                 curent.SetPosition(Vector2i(-1, 0));
@@ -287,14 +286,12 @@ int main()
         //Vertical
         if (Keyboard::isKeyPressed(Keyboard::Down))
         {
-            std::cout << "D" << std::endl;
             counter = sleepTime;
         }
         
         //Roatation
         if (Keyboard::isKeyPressed(Keyboard::Up) && !preasdRoateButton)
         {
-            std::cout << "Rotate" << std::endl;
             if (!ColisionDetecd(curent.GetPositon(), curent.GetTetramino(curent.GetRoatation() + 1)))
             {
                 curent.SetRotation(1);
@@ -320,10 +317,26 @@ int main()
 
                 //Is line complete
                 int temp = CheckLines();
-                score += temp * temp; // add points
+                if (temp > 0)
+                {
+                    score += temp * temp; // add score
+                    lines += temp;        // count lines
 
-                std::cout << "Score: " << score << std::endl;
+                    std::cout << "Score: " << score << std::endl;
+                    std::cout << "Lines: " << lines << std::endl;
 
+                    //Level up
+                    if (lines % 5 == 0 && lines > 0)
+                    {
+                        lvl++;
+                        std::cout << "Curent level: " << lvl << std::endl;
+                        lvlText.setString("Level " + std::to_string(lvl));
+
+                        tetaminoStop = (int)(tetaminoStop * 0.75f);
+                        std::cout << "Game speed: " << tetaminoStop << std::endl;
+
+                    }
+                }
                 //Create new teramino
                 curent = NewTetramino();
                 clear = false;
