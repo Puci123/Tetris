@@ -13,7 +13,7 @@ using namespace sf;
 Vector2i boardSize(12, 22);
 Vector2f boardOffset(40, 40);
 Vector2f cellSize(15, 15);
-Tetramino tetraminos[7];
+Tetramino tetraminos[8];
 
 int* board = nullptr;
 
@@ -62,6 +62,11 @@ void CreateTetraminos()
                    0,0,0,0,
                    0,0,0,0, };
 
+    int empty[4][4] ={0,0,0,0,
+                      0,0,0,0,
+                      0,0,0,0,
+                      0,0,0,0, };
+
     tetraminos[0] = Tetramino(i, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
     tetraminos[1] = Tetramino(j, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
     tetraminos[2] = Tetramino(l, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
@@ -69,6 +74,7 @@ void CreateTetraminos()
     tetraminos[4] = Tetramino(s, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
     tetraminos[5] = Tetramino(t, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
     tetraminos[6] = Tetramino(z, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
+    tetraminos[7] = Tetramino(empty, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
 
 }
 
@@ -158,14 +164,122 @@ bool ColisionDetecd(Vector2i pos, int* tetramino)
     return false;
 }
 
+void CreateBoard() 
+{
+  
+    board = new int[boardSize.x * boardSize.y];         //create paly board 0 empty, 1 tetramino , 2 wall
+
+
+    for (int y = 0; y < boardSize.y; y++)
+    {
+        for (int x = 0; x < boardSize.x; x++)
+        {
+
+            if (y == boardSize.y - 1 || x == 0 || x == boardSize.x - 1)
+            {
+                board[y * boardSize.x + x] = 2;
+            }
+            else
+            {
+                board[y * boardSize.x + x] = 0;
+            }
+        }
+    }
+}
+
+void DrawBoard(RenderWindow &window,Text &scoreText, Text &lvlText) 
+{
+    //clear window
+    window.clear();
+
+    //Draw cells
+    for (int y = 0; y < boardSize.y; y++)
+    {
+        for (int x = 0; x < boardSize.x; x++)
+        {
+            if (board[y * boardSize.x + x] == 1)
+            {
+                RectangleShape cell(Vector2f(cellSize.x - 2, cellSize.y - 2));
+                cell.setPosition(Vector2f(x * cellSize.x + boardOffset.x, y * cellSize.y + boardOffset.y));
+                cell.setFillColor(Color::Red);
+                cell.setOutlineColor(Color::Red);
+
+                window.draw(cell);
+            }
+            else if (board[y * boardSize.x + x] == 2)
+            {
+                RectangleShape cell(Vector2f(cellSize.x, cellSize.y));
+                cell.setPosition(Vector2f(x * cellSize.x + boardOffset.x, y * cellSize.y + boardOffset.y));
+                cell.setFillColor(Color::Blue);
+                cell.setOutlineColor(Color::Blue);
+
+                window.draw(cell);
+            }
+
+        }
+    }
+
+    //Show score
+    window.draw(scoreText);
+    window.draw(lvlText);
+
+    window.display();
+}
+
+void InputHnadle(RenderWindow &window, bool & preasdRoateButton)
+{
+    //Pool event
+    Event event;
+    while (window.pollEvent(event))
+    {
+        //Input handle
+        if (event.type == Event::Closed)
+            window.close();
+        else if (event.type == Event::KeyReleased && event.key.code == Keyboard::Up)
+            preasdRoateButton = false;
+
+    }
+}
+
+void GameOver(Text &scoreText, Text  &lvlText, Tetramino &curent, RenderWindow &window, Font &font)
+{
+    std::cout << "Game over" << std::endl;
+
+    //Clear board
+    for (int i = 0; i < boardSize.x * boardSize.y; i++)
+    {
+        board[i] = 0;
+    }
+
+    //Clear tetramino
+    curent = tetraminos[7];
+
+    //Clear Text
+    scoreText.setPosition(Vector2f(boardSize.x + boardOffset.x + 110, 120));
+    lvlText.setPosition((Vector2f(boardSize.x + boardOffset.x + 110, 100)));
+
+    //Display Game over text
+    Text goText;
+    scoreText.setFont(font);
+    scoreText.setCharacterSize(50);
+    scoreText.setFillColor(Color::White);
+    scoreText.setPosition(Vector2f(boardSize.x + boardOffset.x + 110, 20));
+    scoreText.setString("GAME OVER !!!");
+    
+    window.draw(goText);
+    window.draw(scoreText);
+    window.draw(lvlText);
+
+    window.display();
+}
+
 int main()
 {
 
-    //Awake
+    //---------Awake---------//
     RenderWindow window(VideoMode(600, 600), "Tetris"); //Create window
     window.setFramerateLimit(60);
     
-    board = new int[boardSize.x * boardSize.y];         //create paly board 0 empty, 1 tetramino , 2 wall
    
     //Load font
     Font font;
@@ -182,7 +296,8 @@ int main()
     scoreText.setCharacterSize(20);
     scoreText.setFillColor(Color::White);
     scoreText.setPosition(Vector2f(boardSize.x + boardOffset.x + 200, 20));
-    
+    scoreText.setString("Score 0");
+
 
     //Level Text
     Text lvlText;
@@ -192,29 +307,14 @@ int main()
     lvlText.setPosition(Vector2f(boardSize.x + boardOffset.x + 201, 40));
     lvlText.setString("level 1");
 
-    //fil board
-    for (int y = 0; y < boardSize.y; y++)
-    {
-        for (int x = 0; x < boardSize.x; x++)
-        {
+    
 
-            if (y == boardSize.y - 1 || x == 0 || x == boardSize.x - 1)
-            {
-                board[y * boardSize.x + x] = 2;
-            }
-            else
-            {
-                board[y * boardSize.x + x] = 0;
-            }
-        }
-    }
-
-   
+    CreateBoard();
     CreateTetraminos();
 
     //--------Game varible--------//
     Tetramino curent = tetraminos[0];
-    bool clear = true;
+    bool isPlaying = true;
 
     //Input
     bool preasdRoateButton = false;
@@ -233,162 +333,129 @@ int main()
     int lvl = 1;
 
 
-    //--------Game loop--------//
+    //--------Window loop--------//
     while (window.isOpen())
     {
-     
-        Vector2i traslation(0, 0);
-        bool roatate = false;
-
-        //--------Timing--------//
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
-        counter += 1;
-
-        //--------Input--------//
-       
-        //Pool event
-        Event event;
-        while (window.pollEvent(event))
+        while (isPlaying)
         {
-            //Input handle
-            if (event.type == Event::Closed)
-                window.close();
-            else if (event.type == Event::KeyReleased && event.key.code == Keyboard::Up)
-                preasdRoateButton = false;
-            
-        }
+            Vector2i traslation(0, 0);
+            bool roatate = false;
+
+            //--------Timing--------//
+            std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
+            counter += 1;
+
+            //--------Input--------//
+
+            InputHnadle(window, preasdRoateButton);
 
 
 
-        //--------Move handle--------//
-        
-        ClearTetramino(curent.GetPositon(), curent.GetTetramino());
-        
+            //--------Move handle--------//
+
+            ClearTetramino(curent.GetPositon(), curent.GetTetramino());
 
 
-        //Horizontal
-        if (Keyboard::isKeyPressed(Keyboard::Right))
-        {
-            if (!ColisionDetecd(curent.GetPositon() + Vector2i(1,0), curent.GetTetramino()))
+
+            //Horizontal
+            if (Keyboard::isKeyPressed(Keyboard::Right))
             {
-                curent.SetPosition(Vector2i(1, 0));
-            }
-            
-        }
-        else if (Keyboard::isKeyPressed(Keyboard::Left))
-        {
-            if (!ColisionDetecd(curent.GetPositon() + Vector2i(-1, 0), curent.GetTetramino()))
-            {
-                curent.SetPosition(Vector2i(-1, 0));
-            }
-        }
-        
-        //Vertical
-        if (Keyboard::isKeyPressed(Keyboard::Down))
-        {
-            counter = sleepTime;
-        }
-        
-        //Roatation
-        if (Keyboard::isKeyPressed(Keyboard::Up) && !preasdRoateButton)
-        {
-            if (!ColisionDetecd(curent.GetPositon(), curent.GetTetramino(curent.GetRoatation() + 1)))
-            {
-                curent.SetRotation(1);
-            }
-
-            preasdRoateButton = true;
-
-        }
-       
-
-        //--------Update--------//
-
-        if (counter >= tetaminoStop)
-        {
-            //Move down
-            if (!ColisionDetecd(curent.GetPositon() + Vector2i(0,1),curent.GetTetramino()))
-            {
-                curent.SetPosition(Vector2i(0, 1));
-            }
-            else
-            {
-                DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
-
-                //Is line complete
-                int temp = CheckLines();
-                if (temp > 0)
+                if (!ColisionDetecd(curent.GetPositon() + Vector2i(1, 0), curent.GetTetramino()))
                 {
-                    score += temp * temp; // add score
-                    lines += temp;        // count lines
+                    curent.SetPosition(Vector2i(1, 0));
+                }
 
-                    std::cout << "Score: " << score << std::endl;
-                    std::cout << "Lines: " << lines << std::endl;
+            }
+            else if (Keyboard::isKeyPressed(Keyboard::Left))
+            {
+                if (!ColisionDetecd(curent.GetPositon() + Vector2i(-1, 0), curent.GetTetramino()))
+                {
+                    curent.SetPosition(Vector2i(-1, 0));
+                }
+            }
 
-                    //Level up
-                    if (lines % 5 == 0 && lines > 0)
+            //Vertical
+            if (Keyboard::isKeyPressed(Keyboard::Down))
+            {
+                counter = sleepTime;
+            }
+
+            //Roatation
+            if (Keyboard::isKeyPressed(Keyboard::Up) && !preasdRoateButton)
+            {
+                if (!ColisionDetecd(curent.GetPositon(), curent.GetTetramino(curent.GetRoatation() + 1)))
+                {
+                    curent.SetRotation(1);
+                }
+
+                preasdRoateButton = true;
+
+            }
+
+
+            //--------Update--------//
+
+            if (counter >= tetaminoStop)
+            {
+                //Move down
+                if (!ColisionDetecd(curent.GetPositon() + Vector2i(0, 1), curent.GetTetramino()))
+                {
+                    curent.SetPosition(Vector2i(0, 1));
+                }
+                else
+                {
+                    DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
+
+                    //Is line complete
+                    int temp = CheckLines();
+                    if (temp > 0)
                     {
-                        lvl++;
-                        std::cout << "Curent level: " << lvl << std::endl;
-                        lvlText.setString("Level " + std::to_string(lvl));
+                        score += temp * temp; // add score
+                        lines += temp;        // count lines
 
-                        tetaminoStop = (int)(tetaminoStop * 0.75f);
-                        std::cout << "Game speed: " << tetaminoStop << std::endl;
+                        std::cout << "Score: " << score << std::endl;
+                        std::cout << "Lines: " << lines << std::endl;
+
+                        //Level up
+                        if (lines % 5 == 0 && lines > 0)
+                        {
+                            lvl++;
+                            std::cout << "Curent level: " << lvl << std::endl;
+                            lvlText.setString("Level " + std::to_string(lvl));
+
+                            tetaminoStop = (int)(tetaminoStop * 0.75f);
+                            std::cout << "Game speed: " << tetaminoStop << std::endl;
+
+                        }
+                        
+                        //Display score
+                        scoreText.setString("Score " + std::to_string(score));
 
                     }
-                }
-                //Create new teramino
-                curent = NewTetramino();
-                clear = false;
-                DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
+                    //Create new teramino
+                    curent = NewTetramino();
 
+                    //Game over
+                    if (ColisionDetecd(curent.GetPositon(), curent.GetTetramino()))
+                    {
+                        GameOver(scoreText, lvlText, curent, window, font);
+                        isPlaying = false;
+
+                    }
+                
+                }
+                counter = 0;
             }
+
+            DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
+
+            //--------Render--------//
+            DrawBoard(window,scoreText,lvlText);
+
             
-            counter = 0;
-        }
-        
-        DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
-
-        //--------Render--------//
-
-
-        //clear window
-        window.clear();
-
-        //Draw cells
-        for (int y = 0; y < boardSize.y; y++)
-        {
-            for (int x = 0; x < boardSize.x; x++)
-            {
-                if (board[y * boardSize.x + x] == 1) 
-                {
-                    RectangleShape cell(Vector2f(cellSize.x - 2, cellSize.y - 2));
-                    cell.setPosition(Vector2f(x * cellSize.x + boardOffset.x, y * cellSize.y + boardOffset.y));
-                    cell.setFillColor(Color::Red);
-                    cell.setOutlineColor(Color::Red);
-
-                    window.draw(cell);
-                }
-                else if (board[y * boardSize.x + x] == 2)
-                {
-                    RectangleShape cell(Vector2f(cellSize.x, cellSize.y));
-                    cell.setPosition(Vector2f(x * cellSize.x + boardOffset.x, y * cellSize.y + boardOffset.y));
-                    cell.setFillColor(Color::Blue);
-                    cell.setOutlineColor(Color::Blue);
-
-                    window.draw(cell);
-                }
-               
-            }
         }
 
-        //Show score
-        scoreText.setString("Score " + std::to_string(score));
-        window.draw(scoreText);
-        window.draw(lvlText);
-
-        window.display();
+        InputHnadle(window,preasdRoateButton);
     }
-
     return 0;
 }
