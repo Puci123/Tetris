@@ -1,5 +1,6 @@
 #include "Tetramino.h"
 #include <math.h>
+#include<iostream>
 
 
 Tetramino::Tetramino() 
@@ -59,8 +60,10 @@ int* Tetramino::GetTetramino(int r)
 	{
 		for (int xO = 0; xO < 4; xO++)
 		{
-			int x = round((cos(a) * (xO - pivotPoint.x) - sin(a) * (yO - pivotPoint.y)) + pivotPoint.x);
-			int y = round((sin(a) * (xO - pivotPoint.x) + cos(a) * (yO - pivotPoint.y)) + pivotPoint.y);
+
+
+			int x = round((cos(a) * (xO - pivotPoint.x) - sin(a) * (yO -pivotPoint.x)) + pivotPoint.x);
+			int y = round((sin(a) * (xO - pivotPoint.y) + cos(a) * (yO - pivotPoint.y)) + pivotPoint.y);
 
 			temp[y * 4 + x] = content[yO * 4 + xO];
 		}

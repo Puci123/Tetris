@@ -8,7 +8,7 @@ class Tetramino
 {
 	private:
 		int content[16];
-		double rotation;
+		int rotation;
 		
 		Vector2i position;
 		Vector2f pivotPoint;

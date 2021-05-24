@@ -23,6 +23,8 @@ int* board = nullptr;
 Tetramino NewTetramino() 
 {
     Tetramino temp = tetraminos[rand() % 7];
+    //Tetramino temp = tetraminos[4];
+
     temp.SetPosition(Vector2i(1,1));
 
     return temp;
@@ -109,11 +111,11 @@ void DropStack(int line)
     std::cout << "Drop Down stack" << std::endl;
 }
 
-int CheckLines()
+int CheckLines(int line)
 {
     int completed = 0;
 
-    for (int y = 0; y < boardSize.y - 1; y++)
+    for (int y = line; y < line + 5 && y < boardSize.y - 1; y++)
     {
         bool found = true;
         
@@ -416,7 +418,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
                 DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
 
                 //Is line complete
-                int temp = CheckLines();
+                int temp = CheckLines(curent.GetPositon().y);
                 if (temp > 0)
                 {
                     score += temp * temp; // add score
@@ -426,7 +428,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
                     std::cout << "Lines: " << lines << std::endl;
 
                     //Level up
-                    if (lines % 5 == 0 && lines > 0)
+                    if (lines >= 5)
                     {
                         lvl++;
                         std::cout << "Curent level: " << lvl << std::endl;
@@ -434,6 +436,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
 
                         tetaminoStop = (int)(tetaminoStop * 0.75f);
                         std::cout << "Game speed: " << tetaminoStop << std::endl;
+                        lines = 0;
 
                     }
 
