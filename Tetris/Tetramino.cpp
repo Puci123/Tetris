@@ -18,15 +18,12 @@ Tetramino::Tetramino()
 	rotation = 0;
 }
 
-Tetramino::Tetramino(int tetramino[4][4], Vector2i pos, Vector2f pivot)
+Tetramino::Tetramino(int tetramino[4], Vector2i pos, Vector2f pivot)
 {
 	
-	for (int x = 0; x < 4; x++)
+	for (int i = 0; i < 4; i++)
 	{
-		for (int y = 0; y < 4; y++)
-		{
-			content[y * 4 + x] = tetramino[x][y];
-		}
+		content[i] = tetramino[i];
 	}
 
 	position = pos;
@@ -53,23 +50,7 @@ Vector2i Tetramino::GetPositon()
 
 int* Tetramino::GetTetramino(int r)
 {
-	static int temp[16];
-	float a = r * PI;
-
-	for (int yO = 0; yO < 4; yO++)
-	{
-		for (int xO = 0; xO < 4; xO++)
-		{
-
-
-			int x = round((cos(a) * (xO - pivotPoint.x) - sin(a) * (yO -pivotPoint.x)) + pivotPoint.x);
-			int y = round((sin(a) * (xO - pivotPoint.y) + cos(a) * (yO - pivotPoint.y)) + pivotPoint.y);
-
-			temp[y * 4 + x] = content[yO * 4 + xO];
-		}
-	}
-
-	return temp;
+	return content;
 }
 
 int* Tetramino::GetTetramino() 

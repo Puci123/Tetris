@@ -32,45 +32,15 @@ Tetramino NewTetramino()
 
 void CreateTetraminos()
 {
-    int i[4][4] = { 0,1,0,0,
-                   0,1,0,0,
-                   0,1,0,0,
-                   0,1,0,0, };
+    int i[4] = { 4,5,6,7  };
+    int j[4] = { 0,4,5,6  };
+    int l[4] = { 5,6,7,3  };
+    int o[4] = { 5,6,9,10 };
+    int s[4] = { 5,6,2,3  };
+    int t[4] = { 1,4,5,6  };
+    int z[4] = { 0,1,5,6 };
+    int empty[4] = { -1,-1,-1,-1};
 
-    int j[4][4] = { 0,1,0,0,
-                    0,1,0,0,
-                    1,1,0,0,
-                    0,0,0,0, };
-
-    int l[4][4] = { 0,0,1,0,
-                   0,0,1,0,
-                   0,0,1,1,
-                   0,0,0,0, };
-
-    int o[4][4] = { 0,0,0,0,
-                    0,1,1,0,
-                    0,1,1,0,
-                    0,0,0,0, };
-
-    int s[4][4] = { 0,0,1,1,
-                   0,1,1,0,
-                   0,0,0,0,
-                   0,0,0,0, };
-
-    int t[4][4] = { 0,1,0,0,
-                    1,1,1,0,
-                    0,0,0,0,
-                    0,0,0,0, };
-
-    int z[4][4] = {1,1,0,0,
-                   0,1,1,0,
-                   0,0,0,0,
-                   0,0,0,0, };
-
-    int empty[4][4] ={0,0,0,0,
-                      0,0,0,0,
-                      0,0,0,0,
-                      0,0,0,0, };
 
     tetraminos[0] = Tetramino(i, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
     tetraminos[1] = Tetramino(j, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
@@ -83,18 +53,14 @@ void CreateTetraminos()
 
 }
 
-void DisplayTetramino(Vector2i pos, int* tetramino) 
+void ChangeBoardValue(Vector2i pos, int* tetramino, int value) 
 {
-    for (int y = 0; y < 4; y++)
+    for (int i = 0; i < 4; i++)
     {
-        for (int x = 0; x < 4; x++)
-        {
-            if (tetramino[y * 4 + x] == 1)
-            {
-                board[(y + pos.y) * boardSize.x + x + pos.x] = 1;
+        int x = (tetramino[i] % 4) + pos.x;
+        int y = int(tetramino[i] / 4) + pos.y;
 
-            }
-        }
+        board[y * boardSize.x + x] = value;
     }
 }
 
@@ -139,31 +105,15 @@ int CheckLines(int line)
     return completed;
 }
 
-void ClearTetramino(Vector2i pos, int* tetramino)
-{
-    for (int y = 0; y < 4; y++)
-    {
-        for (int x = 0; x < 4; x++)
-        {
-            if (tetramino[y * 4 + x] == 1 && board[(y + pos.y) * boardSize.x + x + pos.x] == 1)
-            {
-                board[(y + pos.y) * boardSize.x + x + pos.x] = 0;
-
-            }
-        }
-    }
-}
-
 bool ColisionDetecd(Vector2i pos, int* tetramino) 
 {
-    for (int y = 0; y < 4; y++)
+    for (int i = 0; i < 4; i++)
     {
-        for (int x = 0; x < 4; x++)
-        {
-            if (tetramino[y * 4 + x] * board[(pos.y + y) * boardSize.x + x + pos.x] > 0)
-                return true;
-        }
+        int x = (tetramino[i] % 4) + pos.x;
+        int y = int(tetramino[i] / 4) + pos.y;
 
+        if (board[y * boardSize.x + x] != 0)
+            return true;
     }
 
     return false;
@@ -364,7 +314,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
 
         //--------Move handle--------//
 
-        ClearTetramino(curent.GetPositon(), curent.GetTetramino());
+        ChangeBoardValue(curent.GetPositon(), curent.GetTetramino(),0);
 
 
 
@@ -415,7 +365,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
             }
             else
             {
-                DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
+                ChangeBoardValue(curent.GetPositon(), curent.GetTetramino(),1);
 
                 //Is line complete
                 int temp = CheckLines(curent.GetPositon().y);
@@ -457,7 +407,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
             counter = 0;
         }
 
-        DisplayTetramino(curent.GetPositon(), curent.GetTetramino());
+        ChangeBoardValue(curent.GetPositon(), curent.GetTetramino(),1);
 
         //--------Render--------//
         DrawBoard(window, scoreText, lvlText);

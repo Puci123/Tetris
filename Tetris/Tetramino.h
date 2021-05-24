@@ -7,7 +7,7 @@ using namespace sf;
 class Tetramino
 {
 	private:
-		int content[16];
+		int content[4];
 		int rotation;
 		
 		Vector2i position;
@@ -15,7 +15,7 @@ class Tetramino
 		
 
 	public: 
-		Tetramino(int[4][4],Vector2i,Vector2f);
+		Tetramino(int[4],Vector2i,Vector2f);
 		Tetramino();
 		~Tetramino();
 		
