@@ -15,12 +15,20 @@ Tetramino::Tetramino()
 	rotation = 0;
 }
 
-Tetramino::Tetramino(int tetramino[4], Vector2i pos, Vector2f pivot)
+Tetramino::Tetramino(int tetramino[4], Vector2i pos, Vector2f pivot,Vector2i kick[5][4])
 {
 	
 	for (int i = 0; i < 4; i++)
 	{
 		content[i] = tetramino[i];
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			kickTable[i][j] = kick[i][j];
+		}
 	}
 
 	position = pos;
@@ -74,4 +82,9 @@ Vector2i* Tetramino::GetTetramino()
 int Tetramino::GetRoatation() 
 {
 	return rotation;
+}
+
+Vector2i Tetramino::GetFromKickTable(int rotation, int test) 
+{
+	return kickTable[test][rotation];
 }

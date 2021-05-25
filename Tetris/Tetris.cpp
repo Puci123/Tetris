@@ -40,14 +40,90 @@ void CreateTetraminos()
     int s[4] = { 5,6,2,3  };
     int t[4] = { 1,4,5,6  };
     int z[4] = { 0,1,5,6 };
-  
-    tetraminos[0] = Tetramino(i, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
-    tetraminos[1] = Tetramino(j, Vector2i(0, 0), Vector2f(1, 1));
-    tetraminos[2] = Tetramino(l, Vector2i(0, 0), Vector2f(2, 1));
-    tetraminos[3] = Tetramino(o, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
-    tetraminos[4] = Tetramino(s, Vector2i(0, 0), Vector2f(2, 1));
-    tetraminos[5] = Tetramino(t, Vector2i(0, 0), Vector2f(1, 1));
-    tetraminos[6] = Tetramino(z, Vector2i(0, 0), Vector2f(1, 1));
+    
+    Vector2i baseKickiTable[5][4];
+    Vector2i iKickiTable[5][4];
+    Vector2i oKickTable[5][4];
+
+    //-------------JLSTZ---------------//
+    //1
+    baseKickiTable[0][0] = Vector2i(0,0);
+    baseKickiTable[0][1] = Vector2i(0,0);
+    baseKickiTable[0][2] = Vector2i(0,0);
+    baseKickiTable[0][3] = Vector2i(0,0);
+
+    //2
+    baseKickiTable[1][0] = Vector2i(-1, 0);
+    baseKickiTable[1][1] = Vector2i(1, 0);
+    baseKickiTable[1][2] = Vector2i(1, 0);
+    baseKickiTable[1][3] = Vector2i(-1, 0);
+
+    //3
+    baseKickiTable[2][0] = Vector2i(-1, -1);
+    baseKickiTable[2][1] = Vector2i(1, -1);
+    baseKickiTable[2][2] = Vector2i(1, 1);
+    baseKickiTable[2][3] = Vector2i(-1, -1);
+
+    //4
+    baseKickiTable[3][0] = Vector2i(0, -2);
+    baseKickiTable[3][1] = Vector2i(0, 2);
+    baseKickiTable[3][2] = Vector2i(0, -2);
+    baseKickiTable[3][3] = Vector2i(0, 2);
+
+    //5
+    baseKickiTable[4][0] = Vector2i(-1, -2);
+    baseKickiTable[4][1] = Vector2i(1, 2);
+    baseKickiTable[4][2] = Vector2i(1, -2);
+    baseKickiTable[4][3] = Vector2i(-1, 2);
+
+    //-------------I---------------//
+    
+    //1
+    iKickiTable[0][0] = Vector2i(0, 0);
+    iKickiTable[0][1] = Vector2i(0, 0);
+    iKickiTable[0][2] = Vector2i(0, 0);
+    iKickiTable[0][3] = Vector2i(0, 0);
+
+    //2
+    iKickiTable[1][0] = Vector2i(-2, 0);
+    iKickiTable[1][1] = Vector2i(-1, 0);
+    iKickiTable[1][2] = Vector2i(2, 0);
+    iKickiTable[1][3] = Vector2i(1, 0);
+
+    //3
+    iKickiTable[2][0] = Vector2i(1,  0);
+    iKickiTable[2][1] = Vector2i(2,  0);
+    iKickiTable[2][2] = Vector2i(-1, 0);
+    iKickiTable[2][3] = Vector2i(-2, 0);
+
+    //4
+    iKickiTable[3][0] = Vector2i(-2, 1);
+    iKickiTable[3][1] = Vector2i(-1, 2);
+    iKickiTable[3][2] = Vector2i(2, 1);
+    iKickiTable[3][3] = Vector2i(1,-2);
+
+    //5
+    iKickiTable[4][0] = Vector2i(1, 2);
+    iKickiTable[4][1] = Vector2i(2, -1);
+    iKickiTable[4][2] = Vector2i(-1, -2);
+    iKickiTable[4][3] = Vector2i(-2, 1);
+
+    //-------------O---------------//
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            oKickTable[i][j] = Vector2i(0,0);
+        }
+    }
+
+    tetraminos[0] = Tetramino(i, Vector2i(0, 0), Vector2f(1.5f, 1.5f),iKickiTable);
+    tetraminos[1] = Tetramino(j, Vector2i(0, 0), Vector2f(1, 1),baseKickiTable);
+    tetraminos[2] = Tetramino(l, Vector2i(0, 0), Vector2f(2, 1), baseKickiTable);
+    tetraminos[3] = Tetramino(o, Vector2i(0, 0), Vector2f(1.5f, 1.5f),oKickTable);
+    tetraminos[4] = Tetramino(s, Vector2i(0, 0), Vector2f(2, 1), baseKickiTable);
+    tetraminos[5] = Tetramino(t, Vector2i(0, 0), Vector2f(1, 1), baseKickiTable);
+    tetraminos[6] = Tetramino(z, Vector2i(0, 0), Vector2f(1, 1), baseKickiTable);
 }
 
 void ChangeBoardValue(Vector2i pos, Vector2i* tetramino, int value)
@@ -313,10 +389,8 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
 
 
         //--------Move handle--------//
-
+        
         ChangeBoardValue(curent.GetPositon(), curent.GetTetramino(),0);
-
-
 
         //Horizontal
         if (Keyboard::isKeyPressed(Keyboard::Right))
@@ -344,10 +418,21 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
         //Roatation
         if (Keyboard::isKeyPressed(Keyboard::Up) && !preasdRoateButton)
         {
-            if (!ColisionDetecd(curent.GetPositon(), curent.GetTetramino(curent.GetRoatation() + 1)))
+           
+            int roatation = curent.GetRoatation() % 4;
+
+            for (int i = 0; i < 5; i++)
             {
-                curent.SetRotation(1);
+                 if (!ColisionDetecd(curent.GetPositon() + curent.GetFromKickTable(roatation,i), curent.GetTetramino(curent.GetRoatation() + 1)))
+                 {
+                    curent.SetRotation(1);
+                    curent.SetPosition(curent.GetFromKickTable(roatation, i));
+                    break;
+                 }
             }
+            
+            
+            
 
             preasdRoateButton = true;
 
@@ -411,8 +496,6 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
 
         //--------Render--------//
         DrawBoard(window, scoreText, lvlText);
-
-
     }
 }
 
