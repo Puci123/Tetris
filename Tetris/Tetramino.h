@@ -30,6 +30,7 @@ class Tetramino
 
 		Vector2i GetPositon();
 		Vector2i GetFromKickTable(int rotation, int test);
+		Vector2f GetPivotPoint();
 		int GetRoatation();
 };
 

@@ -88,3 +88,8 @@ Vector2i Tetramino::GetFromKickTable(int rotation, int test)
 {
 	return kickTable[test][rotation];
 }
+
+Vector2f Tetramino::GetPivotPoint() 
+{
+	return pivotPoint;
+}

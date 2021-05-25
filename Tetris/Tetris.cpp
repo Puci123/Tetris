@@ -17,6 +17,7 @@ using namespace sf;
 Vector2i boardSize(12, 22);
 Vector2i nextCanvasSize(7, 7);
 
+Vector2f nextCanvasOffset(2,2);
 Vector2f boardOffset(40, 40);
 Vector2f cellSize(15, 15);
 Tetramino tetraminos[7];
@@ -227,25 +228,29 @@ void DrawBoard(RenderWindow &window, Vector2f offset, Vector2i size, int* toDraw
     {
         for (int x = 0; x < size.x; x++)
         {
-            if (toDraw[y * size.x + x] == 1)
+            if (toDraw[y * size.x + x] > 0)
             {
+
                 RectangleShape cell(Vector2f(cellSize.x - 2, cellSize.y - 2));
-                cell.setPosition(Vector2f(x * cellSize.x +  offset.x, y * cellSize.y + offset.y));
-                cell.setFillColor(Color::Red);
-                cell.setOutlineColor(Color::Red);
-
-                window.draw(cell);
-            }
-            else if (toDraw[y * size.x + x] == 2)
-            {
-                RectangleShape cell(Vector2f(cellSize.x, cellSize.y));
                 cell.setPosition(Vector2f(x * cellSize.x + offset.x, y * cellSize.y + offset.y));
-                cell.setFillColor(Color::Blue);
-                cell.setOutlineColor(Color::Blue);
+                
+                if (toDraw[y * size.x + x] == 1)
+                {
+                    cell.setFillColor(Color::Red);
+                    cell.setOutlineColor(Color::Red);
+
+                }
+                else if (toDraw[y * size.x + x] == 2)
+                {
+                    cell.setSize(Vector2f(cellSize.x, cellSize.y));
+                    cell.setFillColor(Color::Blue);
+                    cell.setOutlineColor(Color::Blue);
+
+                }
 
                 window.draw(cell);
-            }
 
+            }
         }
     }
 }
@@ -265,7 +270,7 @@ void InputHnadle(RenderWindow &window, bool & preasdRoateButton)
     }
 }
 
-bool InputHnadle(RenderWindow& window) 
+bool InputHnadle(RenderWindow &window) 
 {
     //Pool event
     Event event;
@@ -339,23 +344,35 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
     int* nextDisplay = new int[nextCanvasSize.x * nextCanvasSize.y];
     board = new int[boardSize.x * boardSize.y];
 
-    CreateBoard(board,boardSize);
-    CreateBoard(nextDisplay, nextCanvasSize);
-
-    for (int x = 0; x < nextCanvasSize.x; x++)
+    for (int i = 0; i < nextCanvasSize.x * nextCanvasSize.y; i++)
     {
-        nextDisplay[x] = 2;
+        nextDisplay[i] = 0;
     }
 
+    CreateBoard(board,boardSize);
+    //CreateBoard(nextDisplay, nextCanvasSize);
+
+    //Score text
     scoreText.setCharacterSize(20);
     scoreText.setFillColor(Color::White);
-    scoreText.setPosition(Vector2f(boardSize.x + boardOffset.x + 200, 20));
+    scoreText.setPosition(Vector2f(boardSize.x + boardOffset.x + 220, 20));
     scoreText.setString("Score 0");
 
+    //lvl text
     lvlText.setCharacterSize(20);
     lvlText.setFillColor(Color::White);
-    lvlText.setPosition(Vector2f(boardSize.x + boardOffset.x + 201, 40));
+    lvlText.setPosition(Vector2f(boardSize.x + boardOffset.x + 221, 40));
     lvlText.setString("level 1");
+
+    //Next text
+    Text pText;
+    pText.setFont(font);
+    pText.setCharacterSize(20);
+    pText.setFillColor(Color::White);
+    pText.setPosition(Vector2f(boardSize.x + boardOffset.x + 225, 80));
+    pText.setString("Next");
+
+    nextCanvasOffset = Vector2f(boardSize.x + boardOffset.x + 205,110);
 
     //--------Game varible--------//
     Tetramino curent = NewTetramino();
@@ -486,7 +503,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
 
                 }
                 //Create new teramino
-                ChangeBoardValue(Vector2i(2, 2), next.GetTetramino(), 0, nextDisplay, nextCanvasSize);
+                ChangeBoardValue(Vector2i(1, 1), next.GetTetramino(), 0, nextDisplay, nextCanvasSize);
                 curent = next;
                 next = NewTetramino();
 
@@ -501,18 +518,19 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
         }
 
         ChangeBoardValue(curent.GetPositon(), curent.GetTetramino(),1,board,boardSize);
-        ChangeBoardValue(Vector2i(2, 2), next.GetTetramino(), 1, nextDisplay, nextCanvasSize);
+        ChangeBoardValue(Vector2i(1,1), next.GetTetramino(), 1, nextDisplay, nextCanvasSize);
 
         //--------Render--------//
         //clear window
         window.clear();
 
         DrawBoard(window,boardOffset,boardSize,board);
-        DrawBoard(window, Vector2f(400, 200), nextCanvasSize, nextDisplay);
+        DrawBoard(window, nextCanvasOffset, nextCanvasSize, nextDisplay);
 
         //Show score
         window.draw(scoreText);
         window.draw(lvlText);
+        window.draw(pText);
 
         window.display();
     }
