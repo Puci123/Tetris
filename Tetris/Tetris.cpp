@@ -15,6 +15,8 @@
 using namespace sf;
 
 Vector2i boardSize(12, 22);
+Vector2i nextCanvasSize(7, 7);
+
 Vector2f boardOffset(40, 40);
 Vector2f cellSize(15, 15);
 Tetramino tetraminos[7];
@@ -126,7 +128,7 @@ void CreateTetraminos()
     tetraminos[6] = Tetramino(z, Vector2i(0, 0), Vector2f(1, 1), baseKickiTable);
 }
 
-void ChangeBoardValue(Vector2i pos, Vector2i* tetramino, int value)
+void ChangeBoardValue(Vector2i pos, Vector2i* tetramino, int value, int* canvas,Vector2i cnavasSize)
 {
     for (int i = 0; i < 4; i++)
     {
@@ -134,7 +136,7 @@ void ChangeBoardValue(Vector2i pos, Vector2i* tetramino, int value)
         int y = tetramino[i].y + pos.y;
         int x = tetramino[i].x + pos.x;
 
-        board[y * boardSize.x + x] = value;
+        canvas[y * cnavasSize.x + x] = value;
     }
 }
 
@@ -195,52 +197,49 @@ bool ColisionDetecd(Vector2i pos, Vector2i* tetramino)
     return false;
 }
 
-void CreateBoard() 
+void CreateBoard(int* canvas, Vector2i size) 
 {
   
-    board = new int[boardSize.x * boardSize.y];         //create paly board 0 empty, 1 tetramino , 2 wall
-
-
-    for (int y = 0; y < boardSize.y; y++)
+    //create paly board 0 empty, 1 tetramino , 2 wall
+    for (int y = 0; y < size.y; y++)
     {
-        for (int x = 0; x < boardSize.x; x++)
+        for (int x = 0; x < size.x; x++)
         {
 
-            if (y == boardSize.y - 1 || x == 0 || x == boardSize.x - 1)
+            if (y == size.y - 1 || x == 0 || x == size.x - 1)
             {
-                board[y * boardSize.x + x] = 2;
+                canvas[y * size.x + x] = 2;
             }
             else
             {
-                board[y * boardSize.x + x] = 0;
+                canvas[y * size.x + x] = 0;
             }
         }
     }
 }
 
-void DrawBoard(RenderWindow &window,Text &scoreText, Text &lvlText) 
+void DrawBoard(RenderWindow &window, Vector2f offset, Vector2i size, int* toDraw) 
 {
-    //clear window
-    window.clear();
+  
 
     //Draw cells
-    for (int y = 0; y < boardSize.y; y++)
+    for (int y = 0; y < size.y; y++)
     {
-        for (int x = 0; x < boardSize.x; x++)
+        for (int x = 0; x < size.x; x++)
         {
-            if (board[y * boardSize.x + x] == 1)
+            if (toDraw[y * size.x + x] == 1)
             {
                 RectangleShape cell(Vector2f(cellSize.x - 2, cellSize.y - 2));
-                cell.setPosition(Vector2f(x * cellSize.x + boardOffset.x, y * cellSize.y + boardOffset.y));
+                cell.setPosition(Vector2f(x * cellSize.x +  offset.x, y * cellSize.y + offset.y));
                 cell.setFillColor(Color::Red);
                 cell.setOutlineColor(Color::Red);
 
                 window.draw(cell);
             }
-            else if (board[y * boardSize.x + x] == 2)
+            else if (toDraw[y * size.x + x] == 2)
             {
                 RectangleShape cell(Vector2f(cellSize.x, cellSize.y));
-                cell.setPosition(Vector2f(x * cellSize.x + boardOffset.x, y * cellSize.y + boardOffset.y));
+                cell.setPosition(Vector2f(x * cellSize.x + offset.x, y * cellSize.y + offset.y));
                 cell.setFillColor(Color::Blue);
                 cell.setOutlineColor(Color::Blue);
 
@@ -249,12 +248,6 @@ void DrawBoard(RenderWindow &window,Text &scoreText, Text &lvlText)
 
         }
     }
-
-    //Show score
-    window.draw(scoreText);
-    window.draw(lvlText);
-
-    window.display();
 }
 
 void InputHnadle(RenderWindow &window, bool & preasdRoateButton)
@@ -341,7 +334,18 @@ void GameOver(Text &scoreText, Text  &lvlText,  RenderWindow &window, Font &font
 void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
 {
     //------Game Start------//
-    CreateBoard();
+    
+
+    int* nextDisplay = new int[nextCanvasSize.x * nextCanvasSize.y];
+    board = new int[boardSize.x * boardSize.y];
+
+    CreateBoard(board,boardSize);
+    CreateBoard(nextDisplay, nextCanvasSize);
+
+    for (int x = 0; x < nextCanvasSize.x; x++)
+    {
+        nextDisplay[x] = 2;
+    }
 
     scoreText.setCharacterSize(20);
     scoreText.setFillColor(Color::White);
@@ -354,7 +358,9 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
     lvlText.setString("level 1");
 
     //--------Game varible--------//
-    Tetramino curent = tetraminos[0];
+    Tetramino curent = NewTetramino();
+    Tetramino next = NewTetramino();
+
     bool isPlaying = true;
 
     //Input
@@ -390,7 +396,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
 
         //--------Move handle--------//
         
-        ChangeBoardValue(curent.GetPositon(), curent.GetTetramino(),0);
+        ChangeBoardValue(curent.GetPositon(), curent.GetTetramino(),0,board,boardSize);
 
         //Horizontal
         if (Keyboard::isKeyPressed(Keyboard::Right))
@@ -450,7 +456,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
             }
             else
             {
-                ChangeBoardValue(curent.GetPositon(), curent.GetTetramino(),1);
+                ChangeBoardValue(curent.GetPositon(), curent.GetTetramino(),1,board,boardSize);
 
                 //Is line complete
                 int temp = CheckLines(curent.GetPositon().y);
@@ -480,7 +486,9 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
 
                 }
                 //Create new teramino
-                curent = NewTetramino();
+                ChangeBoardValue(Vector2i(2, 2), next.GetTetramino(), 0, nextDisplay, nextCanvasSize);
+                curent = next;
+                next = NewTetramino();
 
                 //Game over
                 if (ColisionDetecd(curent.GetPositon(), curent.GetTetramino()))
@@ -492,10 +500,21 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
             counter = 0;
         }
 
-        ChangeBoardValue(curent.GetPositon(), curent.GetTetramino(),1);
+        ChangeBoardValue(curent.GetPositon(), curent.GetTetramino(),1,board,boardSize);
+        ChangeBoardValue(Vector2i(2, 2), next.GetTetramino(), 1, nextDisplay, nextCanvasSize);
 
         //--------Render--------//
-        DrawBoard(window, scoreText, lvlText);
+        //clear window
+        window.clear();
+
+        DrawBoard(window,boardOffset,boardSize,board);
+        DrawBoard(window, Vector2f(400, 200), nextCanvasSize, nextDisplay);
+
+        //Show score
+        window.draw(scoreText);
+        window.draw(lvlText);
+
+        window.display();
     }
 }
 
