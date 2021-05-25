@@ -1,5 +1,7 @@
 #pragma once
 #include<SFML/Graphics.hpp>
+#include <cmath>
+
 #define PI 1.5707963268
 
 using namespace sf;
@@ -22,8 +24,8 @@ class Tetramino
 		void SetPosition(Vector2i);
 		void SetRotation(int);
 
-		int* GetTetramino();
-		int* GetTetramino(int);
+		Vector2i* GetTetramino();
+		Vector2i* GetTetramino(int);
 
 		Vector2i GetPositon();
 		int GetRoatation();

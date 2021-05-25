@@ -1,16 +1,13 @@
 #include "Tetramino.h"
-#include <math.h>
+#include <cmath>
 #include<iostream>
 
 
 Tetramino::Tetramino() 
 {
-	for (int x = 0; x < 4; x++)
+	for (int i = 0; i < 4; i++)
 	{
-		for (int y = 0; y < 4; y++)
-		{
-			content[y * 4 + x] = 0;
-		}
+		content[i] = i;
 	}
 
 	position = Vector2i(0,0);
@@ -48,12 +45,28 @@ Vector2i Tetramino::GetPositon()
 	return position;
 }
 
-int* Tetramino::GetTetramino(int r)
+Vector2i* Tetramino::GetTetramino(int r)
 {
-	return content;
+	static Vector2i displayedTetramino[4];
+	double a = r * PI;
+
+	for (int i = 0; i < 4; i++)
+	{
+		//Get Piece Pos
+		int x =  (content[i] % 4);
+		int y =  (int)(content[i] / 4);
+
+		//Rotate
+		int xNew = round((cos(a) * (x - pivotPoint.x) - sin(a) * (y - pivotPoint.y)) + pivotPoint.x);
+		int yNew = round((sin(a) * (x - pivotPoint.x) + cos(a) * (y - pivotPoint.y)) + pivotPoint.y);
+
+		displayedTetramino[i] = Vector2i(xNew, yNew);
+	}
+
+	return displayedTetramino;
 }
 
-int* Tetramino::GetTetramino() 
+Vector2i* Tetramino::GetTetramino()
 {
 	return Tetramino::GetTetramino(rotation);
 }

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+#include <cmath>
 
 #include "Tetramino.h"
 
@@ -16,7 +17,7 @@ using namespace sf;
 Vector2i boardSize(12, 22);
 Vector2f boardOffset(40, 40);
 Vector2f cellSize(15, 15);
-Tetramino tetraminos[8];
+Tetramino tetraminos[7];
 
 int* board = nullptr;
 
@@ -39,26 +40,23 @@ void CreateTetraminos()
     int s[4] = { 5,6,2,3  };
     int t[4] = { 1,4,5,6  };
     int z[4] = { 0,1,5,6 };
-    int empty[4] = { -1,-1,-1,-1};
-
-
+  
     tetraminos[0] = Tetramino(i, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
-    tetraminos[1] = Tetramino(j, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
-    tetraminos[2] = Tetramino(l, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
+    tetraminos[1] = Tetramino(j, Vector2i(0, 0), Vector2f(1, 1));
+    tetraminos[2] = Tetramino(l, Vector2i(0, 0), Vector2f(2, 1));
     tetraminos[3] = Tetramino(o, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
-    tetraminos[4] = Tetramino(s, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
-    tetraminos[5] = Tetramino(t, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
-    tetraminos[6] = Tetramino(z, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
-    tetraminos[7] = Tetramino(empty, Vector2i(0, 0), Vector2f(1.5f, 1.5f));
-
+    tetraminos[4] = Tetramino(s, Vector2i(0, 0), Vector2f(2, 1));
+    tetraminos[5] = Tetramino(t, Vector2i(0, 0), Vector2f(1, 1));
+    tetraminos[6] = Tetramino(z, Vector2i(0, 0), Vector2f(1, 1));
 }
 
-void ChangeBoardValue(Vector2i pos, int* tetramino, int value) 
+void ChangeBoardValue(Vector2i pos, Vector2i* tetramino, int value)
 {
     for (int i = 0; i < 4; i++)
     {
-        int x = (tetramino[i] % 4) + pos.x;
-        int y = int(tetramino[i] / 4) + pos.y;
+
+        int y = tetramino[i].y + pos.y;
+        int x = tetramino[i].x + pos.x;
 
         board[y * boardSize.x + x] = value;
     }
@@ -105,12 +103,14 @@ int CheckLines(int line)
     return completed;
 }
 
-bool ColisionDetecd(Vector2i pos, int* tetramino) 
+bool ColisionDetecd(Vector2i pos, Vector2i* tetramino)
 {
+    
     for (int i = 0; i < 4; i++)
     {
-        int x = (tetramino[i] % 4) + pos.x;
-        int y = int(tetramino[i] / 4) + pos.y;
+
+        int y = tetramino[i].y + pos.y;
+        int x = tetramino[i].x + pos.x;
 
         if (board[y * boardSize.x + x] != 0)
             return true;
@@ -290,7 +290,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
     int counter = 0;
 
     //Debug
-    curent.SetPosition(Vector2i(1, 1));
+    curent.SetPosition(Vector2i(4, 4));
 
     //Score
     int score = 0;
