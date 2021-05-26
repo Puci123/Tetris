@@ -7,30 +7,18 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
-#include <cmath>
 
 #include "Tetramino.h"
 
 
 using namespace sf;
 
-Vector2i boardSize(12, 22);
-Vector2i nextCanvasSize(7, 7);
-
-Vector2f nextCanvasOffset(2,2);
-Vector2f boardOffset(40, 40);
 Vector2f cellSize(15, 15);
 Tetramino tetraminos[7];
-
-int* board = nullptr;
 
 Tetramino NewTetramino() 
 {
     Tetramino temp = tetraminos[rand() % 7];
-    //Tetramino temp = tetraminos[4];
-
-    temp.SetPosition(Vector2i(1,1));
-
     return temp;
 }
 
@@ -120,13 +108,13 @@ void CreateTetraminos()
         }
     }
 
-    tetraminos[0] = Tetramino(i, Vector2i(0, 0), Vector2f(1.5f, 1.5f),iKickiTable);
-    tetraminos[1] = Tetramino(j, Vector2i(0, 0), Vector2f(1, 1),baseKickiTable);
-    tetraminos[2] = Tetramino(l, Vector2i(0, 0), Vector2f(2, 1), baseKickiTable);
-    tetraminos[3] = Tetramino(o, Vector2i(0, 0), Vector2f(1.5f, 1.5f),oKickTable);
-    tetraminos[4] = Tetramino(s, Vector2i(0, 0), Vector2f(2, 1), baseKickiTable);
-    tetraminos[5] = Tetramino(t, Vector2i(0, 0), Vector2f(1, 1), baseKickiTable);
-    tetraminos[6] = Tetramino(z, Vector2i(0, 0), Vector2f(1, 1), baseKickiTable);
+    tetraminos[0] = Tetramino(i, Vector2i(5, 0), Vector2f(1.5f, 1.5f),iKickiTable);
+    tetraminos[1] = Tetramino(j, Vector2i(4, 0), Vector2f(1, 1),baseKickiTable);
+    tetraminos[2] = Tetramino(l, Vector2i(4, 0), Vector2f(2, 1), baseKickiTable);
+    tetraminos[3] = Tetramino(o, Vector2i(5, 0), Vector2f(1.5f, 1.5f),oKickTable);
+    tetraminos[4] = Tetramino(s, Vector2i(4, 0), Vector2f(2, 1), baseKickiTable);
+    tetraminos[5] = Tetramino(t, Vector2i(4, 0), Vector2f(1, 1), baseKickiTable);
+    tetraminos[6] = Tetramino(z, Vector2i(4, 0), Vector2f(1, 1), baseKickiTable);
 }
 
 void ChangeBoardValue(Vector2i pos, Vector2i* tetramino, int value, int* canvas,Vector2i cnavasSize)
@@ -141,7 +129,7 @@ void ChangeBoardValue(Vector2i pos, Vector2i* tetramino, int value, int* canvas,
     }
 }
 
-void DropStack(int line) 
+void DropStack(int line, int* board,Vector2i boardSize) 
 {
     for (int y = line; y > 1; y--)
     {
@@ -150,11 +138,9 @@ void DropStack(int line)
             board[y * boardSize.x + x] = board[(y - 1) * boardSize.x + x];
         }
     }
-
-    std::cout << "Drop Down stack" << std::endl;
 }
 
-int CheckLines(int line)
+int CheckLines(int line, int* board,Vector2i boardSize)
 {
     int completed = 0;
 
@@ -173,16 +159,15 @@ int CheckLines(int line)
 
         if (found)
         {
-            std::cout << "Complete line" << std::endl;
             completed++;
-            DropStack(y);   
+            DropStack(y,board,boardSize);   
         }
     }
 
     return completed;
 }
 
-bool ColisionDetecd(Vector2i pos, Vector2i* tetramino)
+bool ColisionDetecd(Vector2i pos, Vector2i* tetramino, int* board, Vector2i boardSize)
 {
     
     for (int i = 0; i < 4; i++)
@@ -223,7 +208,7 @@ void DrawBoard(RenderWindow &window, Vector2f offset, Vector2i size, int* toDraw
 {
   
 
-    //Draw cells
+    //Draw cells 0 empty, 1 tetramino , 2 wall
     for (int y = 0; y < size.y; y++)
     {
         for (int x = 0; x < size.x; x++)
@@ -294,15 +279,13 @@ bool InputHnadle(RenderWindow &window)
 
 void GameOver(Text &scoreText, Text  &lvlText,  RenderWindow &window, Font &font)
 {
-    //std::cout << "Game over" << std::endl;
-
+   
     window.clear();
 
-
     //Move text
-    scoreText.setPosition(Vector2f(boardSize.x + boardOffset.x + 210, 150));
+    scoreText.setPosition(Vector2f(230, 150));
     scoreText.setCharacterSize(25);
-    lvlText.setPosition((Vector2f(boardSize.x + boardOffset.x + 210, 180)));
+    lvlText.setPosition((Vector2f(230, 180)));
     lvlText.setCharacterSize(25);
 
     //Game over text
@@ -310,7 +293,7 @@ void GameOver(Text &scoreText, Text  &lvlText,  RenderWindow &window, Font &font
     goText.setFont(font);
     goText.setCharacterSize(50);
     goText.setFillColor(Color::White);
-    goText.setPosition(Vector2f(boardSize.x + boardOffset.x + 110, 50));
+    goText.setPosition(Vector2f(140, 50));
     goText.setString("Game over !!!");
     
     //Inofo text
@@ -318,7 +301,7 @@ void GameOver(Text &scoreText, Text  &lvlText,  RenderWindow &window, Font &font
     infoText.setFont(font);
     infoText.setCharacterSize(20);
     infoText.setFillColor(Color::White);
-    infoText.setPosition(Vector2f(boardSize.x + boardOffset.x + 150, 250));
+    infoText.setPosition(Vector2f(165, 250));
     infoText.setString("Pres enter to continue");
 
     window.draw(infoText);
@@ -340,9 +323,14 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
 {
     //------Game Start------//
     
+    Vector2i nextCanvasSize(7, 7);
+    Vector2f nextCanvasOffset(2, 2);
+
+    Vector2i boardSize(12, 22);
+    Vector2f boardOffset(40, 40);
 
     int* nextDisplay = new int[nextCanvasSize.x * nextCanvasSize.y];
-    board = new int[boardSize.x * boardSize.y];
+    int* board = new int[boardSize.x * boardSize.y];
 
     for (int i = 0; i < nextCanvasSize.x * nextCanvasSize.y; i++)
     {
@@ -388,9 +376,6 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
     int tetaminoStop = 20;
     int counter = 0;
 
-    //Debug
-    curent.SetPosition(Vector2i(4, 4));
-
     //Score
     int score = 0;
     int lines = 0;
@@ -418,7 +403,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
         //Horizontal
         if (Keyboard::isKeyPressed(Keyboard::Right))
         {
-            if (!ColisionDetecd(curent.GetPositon() + Vector2i(1, 0), curent.GetTetramino()))
+            if (!ColisionDetecd(curent.GetPositon() + Vector2i(1, 0), curent.GetTetramino(),board,boardSize))
             {
                 curent.SetPosition(Vector2i(1, 0));
             }
@@ -426,7 +411,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
         }
         else if (Keyboard::isKeyPressed(Keyboard::Left))
         {
-            if (!ColisionDetecd(curent.GetPositon() + Vector2i(-1, 0), curent.GetTetramino()))
+            if (!ColisionDetecd(curent.GetPositon() + Vector2i(-1, 0), curent.GetTetramino(),board,boardSize))
             {
                 curent.SetPosition(Vector2i(-1, 0));
             }
@@ -446,7 +431,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
 
             for (int i = 0; i < 5; i++)
             {
-                 if (!ColisionDetecd(curent.GetPositon() + curent.GetFromKickTable(roatation,i), curent.GetTetramino(curent.GetRoatation() + 1)))
+                 if (!ColisionDetecd(curent.GetPositon() + curent.GetFromKickTable(roatation,i), curent.GetTetramino(curent.GetRoatation() + 1),board,boardSize))
                  {
                     curent.SetRotation(1);
                     curent.SetPosition(curent.GetFromKickTable(roatation, i));
@@ -467,7 +452,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
         if (counter >= tetaminoStop)
         {
             //Move down
-            if (!ColisionDetecd(curent.GetPositon() + Vector2i(0, 1), curent.GetTetramino()))
+            if (!ColisionDetecd(curent.GetPositon() + Vector2i(0, 1), curent.GetTetramino(),board,boardSize))
             {
                 curent.SetPosition(Vector2i(0, 1));
             }
@@ -476,24 +461,19 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
                 ChangeBoardValue(curent.GetPositon(), curent.GetTetramino(),1,board,boardSize);
 
                 //Is line complete
-                int temp = CheckLines(curent.GetPositon().y);
+                int temp = CheckLines(curent.GetPositon().y,board,boardSize);
                 if (temp > 0)
                 {
                     score += temp * temp; // add score
                     lines += temp;        // count lines
 
-                    std::cout << "Score: " << score << std::endl;
-                    std::cout << "Lines: " << lines << std::endl;
-
                     //Level up
                     if (lines >= 5)
                     {
                         lvl++;
-                        std::cout << "Curent level: " << lvl << std::endl;
                         lvlText.setString("Level " + std::to_string(lvl));
 
                         tetaminoStop = (int)(tetaminoStop * 0.75f);
-                        std::cout << "Game speed: " << tetaminoStop << std::endl;
                         lines = 0;
 
                     }
@@ -508,7 +488,7 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
                 next = NewTetramino();
 
                 //Game over
-                if (ColisionDetecd(curent.GetPositon(), curent.GetTetramino()))
+                if (ColisionDetecd(curent.GetPositon(), curent.GetTetramino(),board,boardSize))
                 {
                     isPlaying = false;
                 }
@@ -534,6 +514,9 @@ void Game(RenderWindow &window, Font font, Text &scoreText,Text &lvlText)
 
         window.display();
     }
+
+    delete[] nextDisplay;
+    delete[] board;
 }
 
 int main()
@@ -564,7 +547,6 @@ int main()
    
     //CreateSeed
     srand(unsigned(time(NULL)));
-
     CreateTetraminos();
 
     //--------Window loop--------//
